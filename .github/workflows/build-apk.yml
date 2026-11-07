@@ -34,10 +34,42 @@ jobs:
         run: npm install -g cordova@12
 
       - name: Create Android App
-        run: |
-          cordova create app com.vasanth.blast "VASANTH BLAST"
+        run: cordova create app com.vasanth.blast "VASANTH BLAST"
 
       - name: Extract Website
+        shell: bash
         run: |
+          ZIP_FILE="VASANTH_BLAST_Website_Source-1.zip"
+
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "ERROR: ZIP file not found: $ZIP_FILE"
+            ls -la
+            exit 1
+          fi
+
           mkdir -p website
-          unzip VASANT
+          unzip -o "$ZIP_FILE" -d website
+
+          INDEX_FILE="$(find website -type f -name index.html -print -quit)"
+
+          if [ -z "$INDEX_FILE" ]; then
+            echo "ERROR: index.html was not found inside ZIP"
+            find website -maxdepth 4 -type f
+            exit 1
+          fi
+
+          WEBSITE_DIR="$(dirname "$INDEX_FILE")"
+          mkdir -p app/www
+          cp -a "$WEBSITE_DIR"/. app/www/
+
+      - name: Build APK
+        run: |
+          cd app
+          cordova platform add android@13.0.0
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VASANTH-BLAST-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
