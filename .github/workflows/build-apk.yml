@@ -34,7 +34,7 @@ jobs:
 
       - name: Extract Website
         run: |
-          unzip VASANTH_BLAST_Website_Source_1.zip -d website
+          unzip VASANTH_BLAST_Website_Source-1.zip-d website
           cp -R website/vasanth_blast_website/. app/www/
 
       - name: Build APK
