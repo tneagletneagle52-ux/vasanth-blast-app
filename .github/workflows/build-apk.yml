@@ -1,0 +1,50 @@
+name: Build VASANTH BLAST APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cordova
+        run: npm install -g cordova@12
+
+      - name: Create Android App
+        run: |
+          cordova create app com.vasanth.blast "VASANTH BLAST"
+
+      - name: Extract Website
+        run: |
+          unzip VASANTH_BLAST_Website_Source.zip -d website
+          cp -R website/vasanth_blast_website/. app/www/
+
+      - name: Build APK
+        run: |
+          cd app
+          cordova platform add android@13.0.0
+          cordova build android --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VASANTH-BLAST-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
